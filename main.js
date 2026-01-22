@@ -1,11 +1,55 @@
 const { app, BrowserWindow, Menu, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const { exec } = require("child_process");
 
 let mainWindow = null;
 let filePath = null;
 
-// Create the main window
+
+function runGitCommand(command, cwd) {
+  return new Promise((resolve) => {
+    exec(command, { cwd }, (error, stdout) => {
+      if (error) {
+        resolve("");
+      } else {
+        resolve(stdout.trim());
+      }
+    });
+  });
+}
+
+
+ipcMain.handle("get-git-status", async (event, workspacePath) => {
+  const branch = await runGitCommand(
+    "git branch --show-current",
+    workspacePath
+  );
+
+  const status = await runGitCommand(
+    "git status --porcelain",
+    workspacePath
+  );
+
+  return {
+    branch: branch || "No Branch",
+    dirty: status.length > 0
+  };
+});
+
+function createWindow() {
+  mainWindow = new BrowserWindow({
+    width: 1200,
+    height: 800,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js')
+    },
+    icon: path.join(__dirname, 'assets', 'icon.png')
+  });
+}
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
