@@ -15,6 +15,7 @@ class QuillEditorUI {
     };
 
     this.initializeElements();
+     this.getGitBranch(); 
     this.setupEventListeners();
     this.setupElectronListeners();
     this.setupActivityBar();
@@ -32,37 +33,50 @@ class QuillEditorUI {
     console.log("QuillEditor UI initialized");
   }
 
-  initializeElements() {
-    // Get DOM elements
-    this.codeEditor = document.getElementById("codeEditor");
-    this.syntaxHighlight = document.getElementById("syntaxHighlight");
-    this.lineNumbers = document.getElementById("lineNumbers");
-    this.tabBar = document.getElementById("tabBar");
-    this.openEditorsList = document.getElementById("openEditorsList");
-    this.openFolderActivityBtn = document.getElementById("openFolderActivity"); // Added
+initializeElements() {
+  // Get DOM elements
+  this.codeEditor = document.getElementById("codeEditor");
+  this.syntaxHighlight = document.getElementById("syntaxHighlight");
+  this.lineNumbers = document.getElementById("lineNumbers");
+  this.tabBar = document.getElementById("tabBar");
+  this.openEditorsList = document.getElementById("openEditorsList");
+  this.openFolderActivityBtn = document.getElementById("openFolderActivity");
 
-    // Status bar elements
-    this.cursorPositionElement = document.getElementById("cursorPosition");
-    this.selectionInfoElement = document.getElementById("selectionInfo");
-    this.languageInfoElement = document.getElementById("languageInfo");
-    this.lineCountElement = document.getElementById("lineCount");
-    this.charCountElement = document.getElementById("charCount");
-    this.fileInfoElement = document.getElementById("fileInfo");
-    this.fileStatusElement = document.getElementById("fileStatus");
+  // Status bar container (LEFT)
+  this.statusBarLeft = document.getElementById("status-bar-left");
 
-    // Console elements
-    this.consoleOutput = document.getElementById("consoleOutput");
-    this.clearConsoleBtn = document.getElementById("clearConsoleBtn");
-    this.toggleConsoleBtn = document.getElementById("toggleConsoleBtn");
+  // Status bar elements
+  this.cursorPositionElement = document.getElementById("cursorPosition");
+  this.selectionInfoElement = document.getElementById("selectionInfo");
+  this.languageInfoElement = document.getElementById("languageInfo");
+  this.lineCountElement = document.getElementById("lineCount");
+  this.charCountElement = document.getElementById("charCount");
+  this.fileInfoElement = document.getElementById("fileInfo");
+  this.fileStatusElement = document.getElementById("fileStatus");
 
-    // Activity bar and panels
-    this.activityItems = document.querySelectorAll(".activity-item");
-    this.sidebarPanels = document.querySelectorAll(".sidebar-panel");
+  // Console elements
+  this.consoleOutput = document.getElementById("consoleOutput");
+  this.clearConsoleBtn = document.getElementById("clearConsoleBtn");
+  this.toggleConsoleBtn = document.getElementById("toggleConsoleBtn");
 
-    // Console tabs
-    this.consoleTabs = document.querySelectorAll(".console-tab");
-    this.consoleContents = document.querySelectorAll(".console-content");
-  }
+  // Activity bar and panels
+  this.activityItems = document.querySelectorAll(".activity-item");
+  this.sidebarPanels = document.querySelectorAll(".sidebar-panel");
+
+  // Console tabs
+  this.consoleTabs = document.querySelectorAll(".console-tab");
+  this.consoleContents = document.querySelectorAll(".console-content");
+}
+getGitBranch() {
+  if (!window.electronAPI || !window.electronAPI.getGitBranch) return;
+
+  window.electronAPI.getGitBranch().then((branch) => {
+    if (this.statusBarLeft) {
+      this.statusBarLeft.textContent = `🌿 ${branch}`;
+    }
+  });
+}
+
 
   // helper to normalize paths
 
