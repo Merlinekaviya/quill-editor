@@ -1,9 +1,9 @@
 const { app, BrowserWindow, Menu, ipcMain, dialog } = require("electron");
+const { exec } = require("child_process");
+
 const path = require("path");
 const fs = require("fs");
 const os = require("os");
-const { exec } = require("child_process");
-
 
 let mainWindow = null;
 let filePath = null;
@@ -41,7 +41,7 @@ function createWindow() {
     y: undefined,
     isMaximized: false,
   };
-
+ 
   mainWindow = new BrowserWindow({
     width: windowState.width,
     height: windowState.height,
