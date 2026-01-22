@@ -7,6 +7,7 @@ class QuillEditorUI {
         this.currentLanguage = 'javascript';
         this.isDirty = false;
         this.nextTabId = 1;
+        this.gitStatusEl = null;
         
         this.initializeElements();
         this.setupEventListeners();
@@ -15,9 +16,16 @@ class QuillEditorUI {
         this.updateLineNumbers();
         this.updateStatusBar();
         this.lastKeyWasCtrlK = false;
+      
         
         // Create initial tab
         this.createNewTab();
+        // ===== GIT STATUS ADDITION =====
+        this.setupGitStatusUI();
+        this.setupGitListeners();
+        this.startGitAutoRefresh();
+// ===== END =====
+
         
         console.log('QuillEditor UI initialized');
     }
@@ -53,7 +61,55 @@ class QuillEditorUI {
         this.consoleTabs = document.querySelectorAll('.console-tab');
         this.consoleContents = document.querySelectorAll('.console-content');
     }
-    
+    // ===== GIT STATUS ADDITION =====
+setupGitStatusUI() {
+    const statusBarLeft = document.getElementById('status-bar-left');
+    if (!statusBarLeft) return;
+
+    this.gitStatusEl = document.createElement('span');
+    this.gitStatusEl.id = 'git-status';
+    this.gitStatusEl.style.marginLeft = '12px';
+
+    statusBarLeft.appendChild(this.gitStatusEl);
+}
+
+async refreshGitStatus() {
+    if (!this.workspacePath || !window.gitAPI) {
+        if (this.gitStatusEl) this.gitStatusEl.textContent = '';
+        return;
+    }
+
+    try {
+        const gitInfo = await window.gitAPI.getGitStatus(this.workspacePath);
+        const dirtyIndicator = gitInfo.dirty ? ' ●' : '';
+        this.gitStatusEl.textContent = ` ${gitInfo.branch}${dirtyIndicator}`;
+    } catch {
+        this.gitStatusEl.textContent = '';
+    }
+}
+
+setupGitListeners() {
+    if (!window.electronAPI) return;
+
+    window.electronAPI.onFolderOpened((_, data) => {
+        if (data?.path) {
+            this.workspacePath = data.path;
+            this.refreshGitStatus();
+        }
+    });
+
+    window.electronAPI.onFileSave(() => {
+        this.refreshGitStatus();
+    });
+}
+
+startGitAutoRefresh() {
+    setInterval(() => {
+        this.refreshGitStatus();
+    }, 5000);
+}
+// ===== END =====
+
     setupEventListeners() {
         // Editor events
         this.codeEditor.addEventListener('input', () => this.onEditorInput());
@@ -934,4 +990,4 @@ class QuillEditorUI {
 // Initialize the editor when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.editorUI = new QuillEditorUI();
-});
+});         
